@@ -23,6 +23,7 @@ function Home() {
   const [averageData, setAverageData] = useState([]);
   const { Data } = useSelector((state) => state.Country);
   const { cityData } = useSelector((state) => state.City);
+  const [dataArray, setDataArray] = useState([]);
   useEffect(() => {
     dispatch(getCountriesAction());
   }, []);
@@ -34,13 +35,26 @@ function Home() {
   function getAverageData() {
     const url = "https://api.openaq.org/v2/averages";
     fetch(
-      `${url}?date_from=${startDate}&date_to=${endDate}&country=${country}&limit=1000&page=1&offset=0&sort=desc&location=${city}&group=false`
+      `${url}?date_from=${startDate}&date_to=${endDate}&country=${country}&limit=999&page=1&offset=0&sort=desc&location=${city}&group=false`
     )
       .then((res) => res.json())
       .then((averages) => {
-        setAverageData(averages);
+        setAverageData(averages.results);
       });
   }
+  async function addValues() {
+    
+      await averageData !== null &&
+      averageData !== undefined &&
+      averageData.length > 0 &&
+      averageData.forEach((item) => {
+          setDataArray((dataArray) => [...dataArray, [item.day, item.measurement_count]]);
+        });
+        
+    }
+    useEffect(() => {
+      addValues();
+    }, [averageData]);
   return (
     <Fragment>
       <div className={style.Container}>
@@ -83,9 +97,10 @@ function Home() {
                   ></div>
                   <div className={selectState ? style.AllState : style.stateUp}>
                     {Data &&
-                      Data.map((stateItem) => {
+                      Data.map((stateItem,index) => {
                         return (
                           <input
+                          key={index}
                             type="text"
                             id="state"
                             name={stateItem.code}
@@ -157,14 +172,15 @@ function Home() {
                     {cityData &&
                       cityData
                         .filter((data) => data.country === country)
-                        .map((city) => {
+                        .map((city,index) => {
                           return (
                             <input
+                            key={index}
                               type="text"
                               id="state"
                               name={city.id}
                               readOnly
-                              value={`${city.name}`}
+                              value={city.city===null?city.name:city.city}
                               onClick={(e) => {
                                 setSelectCity(false);
                                 setCity(e.target.value);
@@ -237,12 +253,12 @@ function Home() {
           ) : (
             ""
           )}
-          {averageData.results !== null &&
-          averageData.results !== undefined &&
-          averageData.results.length >= 0 ? (
+          {dataArray !== null &&
+          dataArray!== undefined &&
+          dataArray.length > 0 ? (
             <div className={style.GraphSection}>
               <Graph
-                data={averageData.results}
+                data={dataArray}
                 start={startDate}
                 end={endDate}
               />

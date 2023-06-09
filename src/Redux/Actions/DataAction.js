@@ -12,12 +12,11 @@ export const getCountriesAction = () => async (dispatch) => {
     dispatch({
       type: GET_COUNTRIES_REQUEST,
     });
-    await fetch(`${baseUrl}countries?limit=10000`, {
+    await fetch(`${baseUrl}countries`, {
       method: "GET",
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         dispatch({
           type: GET_COUNTRIES_SUCCESS,
           payload: data,
