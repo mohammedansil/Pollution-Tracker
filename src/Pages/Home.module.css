@@ -136,7 +136,11 @@ box-shadow: 0px 0px 18px -4px rgba(112, 112, 112, 0.453);
 }
 .AllState input,.AllCity input{
     cursor: pointer;
+    overflow-x:scroll
 
+}
+.AllState input::-webkit-scrollbar,.AllCity input::-webkit-scrollbar{
+    display: none;
 }
 @media(max-width:1025px){
     .Container,.Section{
