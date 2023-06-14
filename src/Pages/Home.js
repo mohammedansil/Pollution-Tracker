@@ -7,6 +7,7 @@ import {
 } from "../Redux/Actions/DataAction";
 import { FaChevronDown } from "react-icons/fa";
 import Graph from "../Component/Graph/Graph";
+import Overview from "../Overview";
 function Home() {
   const baseUrl = "https://api.openaq.org/v2";
   const dispatch = useDispatch();
@@ -19,6 +20,8 @@ function Home() {
   const [selectState, setSelectState] = useState(false);
   const [seaAnother, setSearAnother] = useState(false);
   const [selectCity, setSelectCity] = useState(false);
+  const [errorData, setErrorData] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [locationData, setLocationData] = useState([]);
   const [averageData, setAverageData] = useState([]);
   const { Data } = useSelector((state) => state.Country);
@@ -33,23 +36,35 @@ function Home() {
     }
   }, [country]);
   function getAverageData() {
-    const url = "https://api.openaq.org/v2/averages";
+    const url = "https://api.openaq.org/v2/measurements";
     fetch(
-      `${url}?date_from=${startDate}&date_to=${endDate}&country=${country}&limit=999&page=1&offset=0&sort=desc&location=${city}&group=false`
+      `${url}?date_from=${startDate}&date_to=${endDate}&limit=100000&page=1&offset=0&sort=desc&radius=1000&country_id=${country}&city=${city}&order_by=datetime`
+      // "?date_from=${startDate}&date_to=${endDate}&limit=10000&page=1&offset=0&sort=desc&radius=1000&country_id=${country}&city=${city}&order_by=datetime"
+      // `${url}?date_from=${startDate}&date_to=${endDate}&country=${country}&limit=999&page=1&offset=0&sort=desc&location=${city}&group=false`
     )
       .then((res) => res.json())
       .then((averages) => {
+        if(averages.results?.length===0){
+          setErrorData(true)
+        }
         setAverageData(averages.results);
+        console.log(averages);
+        setLoading(false)
       });
   }
   async function addValues() {
     
-      await averageData !== null &&
+      await averageData !== null &
       averageData !== undefined &&
       averageData.length > 0 &&
       averageData.forEach((item) => {
-          setDataArray((dataArray) => [...dataArray, [item.day, item.measurement_count]]);
+        if(item.value<0){
+          console.log(item.value);
+        }
+          setDataArray((dataArray) => [...dataArray, [item.date.local, item.value]]);
+          // setDataArray((dataArray) => [...dataArray, [new Date(item.date.local).valueOf(), item.value]]);
         });
+        
         
     }
     useEffect(() => {
@@ -87,7 +102,7 @@ function Home() {
 
                 <FaChevronDown />
               </div>
-              {selectState === true && seaAnother === false ? (
+              {selectState === true ? (
                 <div className={style.allStateContainer}>
                   <div
                     className={style.overlay}
@@ -107,7 +122,11 @@ function Home() {
                             readOnly
                             value={stateItem.name}
                             onClick={(e) => {
+                              console.log(e.target.name)
                               // setSelectCity(false)
+                              setCity("")
+                  setErrorData(false)
+
                               setSelectState(false);
                               setCountry(e.target.name);
                               setCountryName(e.target.value);
@@ -159,7 +178,7 @@ function Home() {
               ) : (
                 ""
               )}
-              {selectCity === true && seaAnother === false ? (
+              {selectCity === true ? (
                 <div className={style.allStateContainer}>
                   <div
                     className={style.overlay}
@@ -183,6 +202,8 @@ function Home() {
                               value={city.city===null?city.name:city.city}
                               onClick={(e) => {
                                 setSelectCity(false);
+                  setErrorData(false)
+
                                 setCity(e.target.value);
                                 setCityCode(e.target.name);
                               }}
@@ -201,7 +222,12 @@ function Home() {
                 type="date"
                 name=""
                 id=""
+                onKeyDown={()=>{
+                  return false
+                }}
                 onChange={(e) => {
+                  setErrorData(false)
+
                   setStartDate(e.target.value);
                 }}
               />
@@ -213,22 +239,25 @@ function Home() {
                 name=""
                 id=""
                 onChange={(e) => {
+                  setErrorData(false)
+
                   setEndDate(e.target.value);
                 }}
               />
             </div>
           </div>
-          {country.length > 0 &&
-          city.length > 0 &&
-          startDate.length > 0 &&
-          endDate.length > 0 &&
-          seaAnother === false ? (
+          {country?.length > 0 &&
+          city?.length > 0 &&
+          startDate?.length > 0 &&
+          endDate?.length > 0? (
             <div className={style.fetchButtons}>
               <button
                 onClick={() => {
+                  setErrorData(false)
+                  setDataArray([])
+        setLoading(true)
+
                   getAverageData();
-                  setCity("");
-                  setSearAnother(true);
                 }}
               >
                 Show Data
@@ -237,7 +266,7 @@ function Home() {
           ) : (
             ""
           )}
-          {country.length > 0 &&
+          {/* {country.length > 0 &&
           startDate.length > 0 &&
           endDate.length > 0 &&
           seaAnother === true ? (
@@ -252,20 +281,28 @@ function Home() {
             </div>
           ) : (
             ""
-          )}
+          )} */}
           {dataArray !== null &&
           dataArray!== undefined &&
-          dataArray.length > 0 ? (
+          dataArray?.length > 0 ? (
             <div className={style.GraphSection}>
-              <Graph
+              {/* <Graph
                 data={dataArray}
                 start={startDate}
                 end={endDate}
-              />
+              /> */}
+              <Overview data={dataArray}/>
             </div>
           ) : (
             ""
           )}
+          {loading===true?
+          <p>Loading</p>
+          :""}
+          {dataArray !== null &&
+          dataArray!== undefined &&dataArray?.length===0&&errorData?
+      <p>Sorry No Data available</p>
+      :""}
         </div>
       </div>
     </Fragment>

@@ -23,16 +23,72 @@ ChartJS.register(
   Legend,
   zoomPlugin
 );
-export const options = {
+// export const options = {
+//   responsive: true,
+//   plugins: {
+//     title: {
+//       display: true,
+//       text: "Pollution Chart",
+//     },
+//   }
+// };
+const options ={
   responsive: true,
+  
+  // scales: {
+  //   y: {
+  //     min: 20,
+  //     max: 80,
+  //   },
+  //   y2: {
+  //     position: 'right',
+  //     min: -5,
+  //     max: 5
+  //   }
+  // },
   plugins: {
     title: {
       display: true,
       text: "Pollution Chart",
     },
+    zoom: {
+      zoom: {
+        // limits: {
+        //   x: {min: 'original', max: 'original', minRange: 60 * 1000},
+        // },
+        pan: {
+          enabled: true,
+          mode: 'x',
+        },
+        drag:{
+          enabled:true,
+          mode:'x'
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          drag: {
+            enabled: true,
+          },
+          pinch: {
+            enabled: true
+          },
+          mode: 'x',
+        }
+      },
+    },
+  },
+  transitions: {
+    zoom: {
+      animation: {
+        duration: 100
+      }
+    }
   }
 };
 function Graph({ data, start, end }) {
+  console.log(data);
   const Wholedata = {
     datasets: [
       {
@@ -48,11 +104,12 @@ function Graph({ data, start, end }) {
     <Fragment>
       {Wholedata.datasets !== null &&
       Wholedata.datasets !== undefined &&
-      Wholedata.datasets.length > 0 ? (
+      Wholedata.datasets?.length > 0 ? (
         <Line options={options} data={Wholedata}/>
       ) : (
-        ""
+        <p>Let me fetch the data</p>
       )}
+      
     </Fragment>
   );
 }
