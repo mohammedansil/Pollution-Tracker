@@ -7,7 +7,8 @@ import {
 } from "../Redux/Actions/DataAction";
 import { FaChevronDown } from "react-icons/fa";
 import Graph from "../Component/Graph/Graph";
-import Overview from "../Overview";
+import Overview from "../Component/Graph/Overview";
+import Loader from "../Component/Loader/Loader";
 function Home() {
   const baseUrl = "https://api.openaq.org/v2";
   const dispatch = useDispatch();
@@ -199,7 +200,7 @@ function Home() {
                               id="state"
                               name={city.id}
                               readOnly
-                              value={city.city===null?city.name:city.city}
+                              value={city.city===null?city.name:city.city==="INDIA"||city.city==="India"?city.name:city.city}
                               onClick={(e) => {
                                 setSelectCity(false);
                   setErrorData(false)
@@ -266,42 +267,21 @@ function Home() {
           ) : (
             ""
           )}
-          {/* {country.length > 0 &&
-          startDate.length > 0 &&
-          endDate.length > 0 &&
-          seaAnother === true ? (
-            <div className={style.fetchButtons}>
-              <button
-                onClick={() => {
-                  window.location.reload();
-                }}
-              >
-                See Another Data
-              </button>
-            </div>
-          ) : (
-            ""
-          )} */}
           {dataArray !== null &&
           dataArray!== undefined &&
           dataArray?.length > 0 ? (
             <div className={style.GraphSection}>
-              {/* <Graph
-                data={dataArray}
-                start={startDate}
-                end={endDate}
-              /> */}
               <Overview data={dataArray}/>
             </div>
           ) : (
             ""
           )}
           {loading===true?
-          <p>Loading</p>
+          <Loader/>
           :""}
           {dataArray !== null &&
           dataArray!== undefined &&dataArray?.length===0&&errorData?
-      <p>Sorry No Data available</p>
+      <p>OOP's<br/> No Data available</p>
       :""}
         </div>
       </div>
